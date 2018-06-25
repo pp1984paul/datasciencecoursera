@@ -1,0 +1,42 @@
+---
+title: "Assignment"
+author: "Prosenjit"
+date: "June 23, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+For building the model the first step was to clean the data set. in the process of cleaning, the columns with no values were eliminated.
+For cross validation 30% of data set from the training data were kept aside and while testing the accuracy of the model these data set was used.
+Two models were built. 1) rpart 2)random forest. Model with highest accuracy score was selected
+
+```{r cars,echo=TRUE,cache=TRUE}
+library(caret)
+library(randomForest)
+download.file(url="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv",destfile = "training.csv")
+download.file(url="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv",destfile = "testing.csv")
+training<-read.csv("training.csv",na.strings=c("NA","#DIV/0!", ""))
+testing<-read.csv("testing.csv",na.strings=c("NA","#DIV/0!", ""))
+training<-training[,colSums(is.na(training))==0]
+testing<-testing[,colSums(is.na(testing))==0]
+
+training<-training[,-c(1:7)]
+testing<-testing[,-c(1:7)]
+inTrain<-createDataPartition(training$classe,p=0.7,list = FALSE)
+trainingtrain<-training[inTrain,]
+testingtrain<-training[-inTrain,]
+
+modrpart<-train(classe~.,method="rpart",data = trainingtrain)
+modrf<-randomForest(classe~.,method="class",data = trainingtrain)
+predrpart<-predict(modrpart,testingtrain)
+predrf<-predict(modrf,testingtrain)
+confusionMatrix(predrpart,testingtrain$classe)
+confusionMatrix(predrf,testingtrain$classe)
+predictfinal<-predict(modrf,testing)
+predictfinal
+```
+
+
